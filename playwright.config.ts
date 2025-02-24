@@ -1,11 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
 
+
+export const STORAGE_STATE = "./auth/session.json";
+
 export default defineConfig({
   // Look for test files in the "tests" directory, relative to this configuration file.
   testDir: 'e2e/tests',
 
   // Run all tests in parallel.
-  fullyParallel: false,
+  fullyParallel: true,
 
   // Fail the build on CI if you accidentally left test.only in the source code.
   forbidOnly: !!process.env.CI,
@@ -20,19 +23,38 @@ export default defineConfig({
   reporter: 'html',
 
   use: {
-    // Base URL to use in actions like `await page.goto('/')`.
-    baseURL: 'http://127.0.0.1:3000',
-
     // Collect trace when retrying the failed test.
+    baseURL: "http://localhost:3000",
     trace: 'on-first-retry',
-
   },
+
   // Configure projects for major browsers.
   projects: [
     {
-      name: 'chromium',
+      name: "login",
       use: { ...devices['Desktop Chrome']},
+      testMatch: "**/loginFixture.setup.ts",
     },
+
+    {
+      name: "teardown",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: "**/global.teardown.ts",
+    },
+
+    {
+      name: "Logged in tests",
+      use: { ...devices["Desktop Chrome"], storageState: STORAGE_STATE },
+      dependencies: ["login"],
+      teardown: "teardown",
+      testMatch: "**/*.spec.ts",
+      testIgnore: "**/registerFixture.spec.ts"
+    },
+    {
+      name: "Logged out tests",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: "**/registerFixture.spec.ts"
+    }
   ],
   // Run your local dev server before starting the tests.
   // webServer: {

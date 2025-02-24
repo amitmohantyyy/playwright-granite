@@ -1,6 +1,6 @@
 
 import {test, expect} from "@playwright/test";
-import LoginPage from "../pom/login";
+import LoginPage from "../e2e/pom/login";
 
 test.describe("Login Page", () => {
     test("Should login with the correct credentials", async ({ page }) => {

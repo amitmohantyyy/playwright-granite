@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import {test, expect} from "@playwright/test";
-import LoginPage from "../pom/login.ts";
+import LoginPage from "../e2e/pom/login.ts";
 
 test.describe("Register page", () => {
     test("Should register a new user", async ({ page }) => {
