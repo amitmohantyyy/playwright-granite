@@ -5,7 +5,7 @@ import TaskPage from "../pom/tasks";
 interface ExtendedFixtures {
     loginPage: LoginPage;
     taskPage: TaskPage;
-};
+}
 
 export const test = base.extend<ExtendedFixtures>({
     loginPage: async ({ page }, use) => {
