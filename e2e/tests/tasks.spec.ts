@@ -5,7 +5,7 @@ import { expect } from "@playwright/test";
 import { faker } from "@faker-js/faker";
 
 test.describe("Tasks page", () => {
-    const taskName = faker.word.words({ count: 5 });
+  const taskName = faker.word.words({ count: 5 });
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
@@ -18,8 +18,9 @@ test.describe("Tasks page", () => {
   });
 
   test("should be able to mark a task as completed", async ({
-    page,
+    page, taskPage,
   }) => {
+    await taskPage.createTaskAndVerify({ taskName });
     await page
       .getByTestId("tasks-pending-table")
       .getByRole("row", { name: taskName })

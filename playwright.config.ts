@@ -25,7 +25,7 @@ export default defineConfig({
   use: {
     // Collect trace when retrying the failed test.
     baseURL: "http://localhost:3000",
-    trace: 'on-first-retry',
+    trace: 'on',
   },
 
   // Configure projects for major browsers.
