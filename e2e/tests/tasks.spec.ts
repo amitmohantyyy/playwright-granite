@@ -9,42 +9,56 @@ import LoginPage from "../pom/login";
 test.describe("Tasks page", () => {
 
   let taskName: string;
-  test.beforeEach(async ({ page }) => {
-    await page.goto("/");
+
+  test.beforeEach(async ({ page, taskPage }, testInfo) => {
     taskName = faker.word.words({ count: 5 });
-  });
 
-
-  test("should create a new task with creator as the assignee", async ({
-    taskPage,
-  }) => {
+    if (testInfo.title.includes("[SKIP_SETUP]")) return;
+    
+    await page.goto("/");
     await taskPage.createTaskAndVerify({ taskName });
   });
+
+  test.afterEach(async ({ page, taskPage }) => {
+    await page.goto("/");
+    await taskPage.markTaskAsCompleteAndVerify({ taskName });
+    const completedTaskInDashboard = page.getByTestId("tasks-completed-table")
+      .getByRole("row", { name: taskName });
+
+    await completedTaskInDashboard.getByTestId("completed-task-delete-link").click();
+    await expect(completedTaskInDashboard).toBeHidden();
+    await expect(page.getByTestId("tasks-pending-table").getByRole("row", { name: taskName })).toBeHidden();
+  });
+
+  // THIS TEST LOGIC IS BEING HANDLED IN THE BEFOREEACH 
+  // test("should create a new task with creator as the assignee", async ({
+  //   taskPage,
+  // }) => {
+  //   await taskPage.createTaskAndVerify({ taskName });
+  // });
 
 
   test("should be able to mark a task as completed", async ({
     taskPage,
   }) => {
-    await taskPage.createTaskAndVerify({ taskName });
     await taskPage.markTaskAsCompleteAndVerify({ taskName });
   });
 
-  test("should be able to delete a completed task", async ( { taskPage }) =>{
-    await taskPage.createTaskAndVerify({ taskName });
-    await taskPage.markTaskAsCompleteAndVerify({ taskName });
-    await taskPage.deleteCompletedTaskAndVerify({ taskName });
-  });
+  //THIS TEST FUNCTION IS BEING EXECUTED IN THE AFTEREACH BLOCK
+  // test("should be able to delete a completed task", async ( { taskPage }) =>{
+  //   await taskPage.createTaskAndVerify({ taskName });
+  //   await taskPage.markTaskAsCompleteAndVerify({ taskName });
+  //   await taskPage.deleteCompletedTaskAndVerify({ taskName });
+  // });
 
   test.describe("Starring tasks feature", () => {
     test.describe.configure({ mode: "serial" });
 
     test("should be able to star a pending task", async ({ page, taskPage }) => {
-      await taskPage.createTaskAndVerify({ taskName });
       await taskPage.starTaskAndVerify({ taskName });
     });
   
     test("should be able to un-star a pending task", async ({ page, taskPage }) => {
-      await taskPage.createTaskAndVerify({ taskName });
       await taskPage.starTaskAndVerify({ taskName });
       
       const starIcon = page
@@ -56,7 +70,8 @@ test.describe("Tasks page", () => {
     });
   });
 
-  test("should create a new task with a different user as the assignee", async({ page, browser, taskPage }) => {
+  test("should create a new task with a different user as the assignee [SKIP_SETUP]", async({ page, browser, taskPage }) => {
+    await page.goto('/');
     await taskPage.createTaskAndVerify({ taskName, userName: "Sam Smith" });
 
   // Creating a new browser context and a page in the browser without restoring the session

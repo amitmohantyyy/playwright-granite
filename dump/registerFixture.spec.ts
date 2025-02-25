@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { test } from "../fixtures";
+import { test } from "../e2e/fixtures";
 
 test.describe("Register page", () => {
     test("Should register a new user", async ({ page, loginPage }) => {
