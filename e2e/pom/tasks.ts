@@ -9,6 +9,10 @@ interface CreateNewTaskProps extends TaskName {
     userName?: string;
 }
 
+interface CommentProps extends TaskName {
+    comment: string;
+}
+
 export default class TaskPage {
     page: Page;
 
@@ -16,7 +20,7 @@ export default class TaskPage {
         this.page = page;
     }
 
-    createTaskAndVerify = async ({ taskName, userName = "Oliver Smith" }: CreateNewTaskProps) => {
+    createTaskAndVerify = async ({ taskName, userName = "Sam Smith" }: CreateNewTaskProps) => {
         await this.page.getByTestId('navbar-add-todo-link').click();
         await this.page.getByTestId('form-title-field').fill(taskName);
 
@@ -81,5 +85,38 @@ export default class TaskPage {
         await expect(this.page
             .getByTestId("tasks-pending-table")
             .getByRole("row").nth(1)).toContainText(taskName);
+    };
+
+    addCommentAndVerifyTimestamp = async ({ taskName, comment }: CommentProps): Promise<void> => {
+        await this.page.getByTestId('tasks-pending-table').getByText(taskName).first().click();
+
+        //add comment
+        await this.page.getByTestId('comments-text-field').fill(comment);
+        const now: Date = new Date();
+        await this.page.getByTestId('comments-submit-button').click();
+
+        //time buffer
+        const oneMinuteAgo: Date = new Date(now.getTime() - 60000);
+        const oneMinuteLater: Date = new Date(now.getTime() + 60000);
+
+        //verify comment
+        const timestampRegex = new RegExp(`${comment}(\\d{1,2}/\\d{1,2}/\\d{4}, \\d{1,2}:\\d{2}:\\d{2} (AM|PM))`);
+        const commentElement = this.page.getByText(timestampRegex);
+        await expect(commentElement).toBeVisible();
+
+        //validate timestamp
+        const commentText = await commentElement.textContent();
+        if (!commentText) {
+            throw new Error("Comment text not found~");
+        }
+
+        const match = commentText.match(timestampRegex);
+        if (!match || match.length < 2) {
+            throw new Error(`Failed to extract timestamp from: ${commentText}`);
+        }
+
+        const commentTimeString: string = match[1];
+        const postedTime: Date = new Date(commentTimeString);
+        expect(postedTime >= oneMinuteAgo && postedTime <= oneMinuteLater).toBeTruthy();
     };
 };
