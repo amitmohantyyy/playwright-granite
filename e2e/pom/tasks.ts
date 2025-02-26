@@ -119,4 +119,16 @@ export default class TaskPage {
         const postedTime: Date = new Date(commentTimeString);
         expect(postedTime >= oneMinuteAgo && postedTime <= oneMinuteLater).toBeTruthy();
     };
+
+    async verifyCommentCountIncrease({ taskName }: { taskName: string }, expectedCount: number): Promise<void> {
+        await this.page.goto("/");
+        
+        const commentsCountElement = this.page
+          .getByTestId("tasks-pending-table")
+          .getByRole("row", { name: taskName })
+          .getByRole('cell')
+          .nth(3);
+        
+        await expect(commentsCountElement).toContainText(`${expectedCount}`);
+      };
 };
